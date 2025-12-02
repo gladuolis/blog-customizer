@@ -30,3 +30,16 @@
 	justify-content: space-between;
 	margin-top: auto;
 }
+
+.formContent {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.formSection {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
