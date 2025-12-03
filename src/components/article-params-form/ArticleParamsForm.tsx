@@ -1,9 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
+import clsx from 'clsx';
 import { ArrowButton } from 'src/ui/arrow-button';
 import { Button } from 'src/ui/button';
 import { Select } from 'src/ui/select';
 import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
+import { useCloseOnOutsideClickOrEsc } from 'src/hooks/useCloseOnOutsideClickOrEsc';
 import {
 	ArticleStateType,
 	fontFamilyOptions,
@@ -37,36 +39,12 @@ export const ArticleParamsForm = ({
 }: ArticleParamsFormProps) => {
 	const asideRef = useRef<HTMLDivElement>(null);
 
-	// Закрытие формы при клике вне её
-	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			const target = event.target as Element;
-
-			// Проверяем, кликнули ли мы на стрелку или её родительский элемент
-			const isArrowButton = target.closest(
-				'[role="button"][aria-label*="стрел"]'
-			);
-			const isArrowButtonParent = target.closest('[role="button"]');
-
-			// Если клик был вне формы и не на стрелке - закрываем форму
-			if (
-				asideRef.current &&
-				!asideRef.current.contains(target) &&
-				!isArrowButton &&
-				!isArrowButtonParent
-			) {
-				onCloseForm();
-			}
-		};
-
-		if (isOpen) {
-			document.addEventListener('mousedown', handleClickOutside);
-		}
-
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
-	}, [isOpen, onCloseForm]);
+	// Используем кастомный хук для закрытия по клику вне или Esc
+	useCloseOnOutsideClickOrEsc({
+		isOpenElement: isOpen,
+		elementRef: asideRef,
+		onClose: onCloseForm,
+	});
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -83,9 +61,9 @@ export const ArticleParamsForm = ({
 			<ArrowButton isOpen={isOpen} onClick={onToggleForm} />
 			<aside
 				ref={asideRef}
-				className={`${styles.container} ${
-					isOpen ? styles.container_open : ''
-				}`}>
+				className={clsx(styles.container, {
+					[styles.container_open]: isOpen,
+				})}>
 				<form
 					className={styles.form}
 					onSubmit={handleSubmit}
@@ -104,7 +82,7 @@ export const ArticleParamsForm = ({
 
 						<Separator />
 
-						{/* Размер шрифта */}
+						{/* Размер шрифта - ОСТАЕТСЯ RadioGroup */}
 						<div className={styles.formSection}>
 							<RadioGroup
 								name='fontSize'
@@ -117,40 +95,40 @@ export const ArticleParamsForm = ({
 
 						<Separator />
 
-						{/* Цвет шрифта */}
+						{/* Цвет шрифта - МЕНЯЕМ на Select */}
 						<div className={styles.formSection}>
-							<RadioGroup
-								name='fontColor'
-								options={fontColors}
-								selected={formParams.fontColor}
-								onChange={(option) => onFormChange('fontColor', option)}
+							<Select
 								title='Цвет шрифта'
+								selected={formParams.fontColor}
+								options={fontColors}
+								onChange={(option) => onFormChange('fontColor', option)}
+								placeholder='Выберите цвет шрифта'
 							/>
 						</div>
 
 						<Separator />
 
-						{/* Цвет фона */}
+						{/* Цвет фона - МЕНЯЕМ на Select */}
 						<div className={styles.formSection}>
-							<RadioGroup
-								name='backgroundColor'
-								options={backgroundColors}
-								selected={formParams.backgroundColor}
-								onChange={(option) => onFormChange('backgroundColor', option)}
+							<Select
 								title='Цвет фона'
+								selected={formParams.backgroundColor}
+								options={backgroundColors}
+								onChange={(option) => onFormChange('backgroundColor', option)}
+								placeholder='Выберите цвет фона'
 							/>
 						</div>
 
 						<Separator />
 
-						{/* Ширина контента */}
+						{/* Ширина контента - МЕНЯЕМ на Select */}
 						<div className={styles.formSection}>
-							<RadioGroup
-								name='contentWidth'
-								options={contentWidthArr}
-								selected={formParams.contentWidth}
-								onChange={(option) => onFormChange('contentWidth', option)}
+							<Select
 								title='Ширина контента'
+								selected={formParams.contentWidth}
+								options={contentWidthArr}
+								onChange={(option) => onFormChange('contentWidth', option)}
+								placeholder='Выберите ширину'
 							/>
 						</div>
 					</div>
